@@ -1,43 +1,153 @@
-const canvas = document.getElementById("renderCanvas"); // Get the canvas element
-const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+// Ambil elemen canvas
+const canvas = document.getElementById("renderCanvas");
 
-// Add your code here matching the playground format
-const createScene = function () {
-  const scene = new BABYLON.Scene(engine);
-
-  //   BABYLON.MeshBuilder.CreateBox("box", {});
-
-  //import model mobil
-  BABYLON.SceneLoader.ImportMesh(
-    "",
-    "./vcarb02/",
-    "visa_cash_app_racing_bulls_vcarb_02_yuki_tsunoda.glb"
-  );
-
-  const camera = new BABYLON.ArcRotateCamera(
-    "camera",
-    -Math.PI / 2,
-    Math.PI / 2.5,
-    15,
-    new BABYLON.Vector3(0, 0, 0)
-  );
-  camera.attachControl(canvas, true);
-  const light = new BABYLON.HemisphericLight(
-    "light",
-    new BABYLON.Vector3(1, 1, 0)
-  );
-
-  return scene;
+// Jalankan render loop
+const startRenderLoop = function (engine, canvas) {
+  engine.runRenderLoop(function () {
+    if (sceneToRender && sceneToRender.activeCamera) {
+      sceneToRender.render();
+    }
+  });
 };
 
-const scene = createScene(); //Call the createScene function
+// Variabel global
+var engine = null;
+var scene = null;
+var sceneToRender = null;
 
-// Register a render loop to repeatedly render the scene
-engine.runRenderLoop(function () {
-  scene.render();
+// Buat engine default
+const createDefaultEngine = function () {
+  return new BABYLON.Engine(canvas, true, {
+    preserveDrawingBuffer: true,
+    stencil: true,
+    disableWebGL2Support: false,
+  });
+};
+
+// Buat scene
+class Playground {
+  static async CreateScene(engine) {
+    const scene = new BABYLON.Scene(engine);
+
+    // Tambah skybox
+    const hdrTexture = BABYLON.CubeTexture.CreateFromPrefilteredData(
+      "textures/environment.dds",
+      scene
+    );
+    scene.createDefaultSkybox(hdrTexture, true);
+
+    // Load model mobil F1
+    var result = await BABYLON.SceneLoader.ImportMeshAsync(
+      "",
+      "/",
+      "f12026.glb",
+      scene
+    );
+    const carRoot = result.meshes[0];
+
+    carRoot.rotation = new BABYLON.Vector3(0, 1.57, 0);
+
+    // Tambah kamera dan cahaya
+    scene.createDefaultCameraOrLight(true, true, true);
+
+    const camera = scene.activeCamera;
+    camera.alpha = Math.PI / 2;
+
+    const TRACK_WIDTH = 8; // Ubah ke 10 jika mau lebih lebar
+    const KERB_OFFSET = TRACK_WIDTH / 2 + 0.25; // Tambahan 0.25 agar kerb menempel di pinggir
+
+    // Track lebih lebar
+    const track = BABYLON.MeshBuilder.CreateBox(
+      "track",
+      {
+        width: TRACK_WIDTH,
+        height: 0.1,
+        depth: 100,
+      },
+      scene
+    );
+
+    const trackMat = new BABYLON.StandardMaterial("trackMat", scene);
+    trackMat.diffuseColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+    track.material = trackMat;
+    track.position.y = 0.05;
+
+    // Kerb kiri
+    for (let i = -50; i < 50; i += 2) {
+      const kerb = BABYLON.MeshBuilder.CreateBox(
+        "kerb",
+        {
+          width: 0.5,
+          height: 0.1,
+          depth: 2,
+        },
+        scene
+      );
+
+      const kerbMat = new BABYLON.StandardMaterial("kerbMat", scene);
+      kerbMat.diffuseColor =
+        (i / 2) % 2 === 0 ? BABYLON.Color3.Red() : BABYLON.Color3.White();
+      kerb.material = kerbMat;
+
+      kerb.position.set(-KERB_OFFSET, 0.05, i);
+    }
+
+    // Kerb kanan
+    for (let i = -50; i < 50; i += 2) {
+      const kerb = BABYLON.MeshBuilder.CreateBox(
+        "kerbRight",
+        {
+          width: 0.5,
+          height: 0.1,
+          depth: 2,
+        },
+        scene
+      );
+
+      const kerbMat = new BABYLON.StandardMaterial("kerbRightMat", scene);
+      kerbMat.diffuseColor =
+        (i / 2) % 2 === 0 ? BABYLON.Color3.Red() : BABYLON.Color3.White();
+      kerb.material = kerbMat;
+
+      kerb.position.set(KERB_OFFSET, 0.05, i);
+    }
+
+    return scene;
+  }
+}
+
+// Panggil scene builder
+const createScene = function () {
+  return Playground.CreateScene(engine, engine.getRenderingCanvas());
+};
+
+// Inisialisasi aplikasi
+window.initFunction = async function () {
+  const asyncEngineCreation = async function () {
+    try {
+      return createDefaultEngine();
+    } catch (e) {
+      console.warn("Gagal buat engine, coba ulang.");
+      return createDefaultEngine();
+    }
+  };
+
+  window.engine = await asyncEngineCreation();
+
+  if (!engine) throw "Engine tidak boleh null.";
+
+  startRenderLoop(engine, canvas);
+  window.scene = createScene();
+};
+
+// Jalankan inisialisasi dan ambil scene
+initFunction().then(() => {
+  scene.then((returnedScene) => {
+    sceneToRender = returnedScene;
+  });
 });
 
-// Watch for browser/canvas resize events
+// Resize canvas saat jendela berubah
 window.addEventListener("resize", function () {
   engine.resize();
 });
