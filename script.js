@@ -37,10 +37,9 @@ class Playground {
       scene
     );
     const carRoot = result.meshes[0];
-
     carRoot.rotation = new BABYLON.Vector3(0, 1.57, 0);
 
-    // Animasi Mobil
+    // Tambah animasi mobil
     const animation = new BABYLON.Animation(
       "carMove",
       "position.z",
@@ -49,34 +48,32 @@ class Playground {
       BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
     );
 
-    // Keyframes animasi
     const keys = [];
-    keys.push({ frame: 0, value: -40 }); // Titik awal
-    keys.push({ frame: 60, value: 40 }); // Maju
-
+    keys.push({ frame: 0, value: -40 });
+    keys.push({ frame: 60, value: 40 });
     animation.setKeys(keys);
-
-    // Tambahkan animasi ke mobil
     carRoot.animations = [animation];
-
-    // Mulai animasi
     scene.beginAnimation(carRoot, 0, 120, true);
 
     // Tambah kamera
     scene.createDefaultCamera(true, true, true);
-
     const camera = scene.activeCamera;
     camera.alpha = Math.PI / 2;
 
-    // Tambah Cahaya
-    // Cahaya Matahari
+    // Tambah cahaya Directional (matahari)
     const light = new BABYLON.DirectionalLight(
       "DirectionalLight",
-      new BABYLON.Vector3(0, -1, 0),
+      new BABYLON.Vector3(-1, -2, -1).normalize(),
       scene
     );
-    light.position = new BABYLON.Vector3(0, 10, 0);
+    light.position = new BABYLON.Vector3(20, 40, 20);
     light.intensity = 3;
+
+    // Shadow Generator
+    const shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
+    shadowGenerator.useBlurExponentialShadowMap = true;
+    shadowGenerator.blurKernel = 32;
+    shadowGenerator.addShadowCaster(carRoot, true);
 
     // Cahaya Ambient Sore
     var light1 = new BABYLON.HemisphericLight(
@@ -84,7 +81,6 @@ class Playground {
       new BABYLON.Vector3(0, 10, 0),
       scene
     );
-
     light1.intensity = 1;
     light1.diffuse = new BABYLON.Color3(1, 0.6, 0);
     light1.specular = new BABYLON.Color3(0.9, 0.9, 0.6);
@@ -100,13 +96,13 @@ class Playground {
       },
       scene
     );
-
     const trackMat = new BABYLON.StandardMaterial("trackMat", scene);
     trackMat.diffuseColor = new BABYLON.Color3(0.1, 0.1, 0.1);
     track.material = trackMat;
     track.position.y = 0.05;
+    track.receiveShadows = true;
 
-    const KERB_OFFSET = 8 / 2 + 0.25; // Tambahan 0.25 agar kerb menempel di pinggir
+    const KERB_OFFSET = 8 / 2 + 0.25;
 
     // Kerb kiri
     for (let i = -50; i < 50; i += 2) {
@@ -119,13 +115,12 @@ class Playground {
         },
         scene
       );
-
       const kerbMat = new BABYLON.StandardMaterial("kerbMat", scene);
       kerbMat.diffuseColor =
         (i / 2) % 2 === 0 ? BABYLON.Color3.Red() : BABYLON.Color3.White();
       kerb.material = kerbMat;
-
       kerb.position.set(-KERB_OFFSET, 0.05, i);
+      kerb.receiveShadows = true;
     }
 
     // Kerb kanan
@@ -139,13 +134,12 @@ class Playground {
         },
         scene
       );
-
       const kerbMat = new BABYLON.StandardMaterial("kerbRightMat", scene);
       kerbMat.diffuseColor =
         (i / 2) % 2 === 0 ? BABYLON.Color3.Red() : BABYLON.Color3.White();
       kerb.material = kerbMat;
-
       kerb.position.set(KERB_OFFSET, 0.05, i);
+      kerb.receiveShadows = true;
     }
 
     return scene;
