@@ -45,7 +45,7 @@ class Playground {
       "position.z",
       30,
       BABYLON.Animation.ANIMATIONTYPE_FLOAT,
-      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
+      BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
     );
 
     const keys = [];
@@ -53,7 +53,7 @@ class Playground {
     keys.push({ frame: 90, value: 40 });
     animation.setKeys(keys);
     carRoot.animations = [animation];
-    scene.beginAnimation(carRoot, 0, 120, true);
+    scene.beginAnimation(carRoot, 0, 90, false);
 
     // Tambah kamera
     scene.createDefaultCamera(true, true, true);
