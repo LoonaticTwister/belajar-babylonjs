@@ -50,7 +50,7 @@ class Playground {
 
     const keys = [];
     keys.push({ frame: 0, value: -40 });
-    keys.push({ frame: 60, value: 40 });
+    keys.push({ frame: 90, value: 40 });
     animation.setKeys(keys);
     carRoot.animations = [animation];
     scene.beginAnimation(carRoot, 0, 120, true);
