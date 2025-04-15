@@ -47,20 +47,39 @@ class Playground {
 
     carRoot.rotation = new BABYLON.Vector3(0, 1.57, 0);
 
-    // Tambah kamera dan cahaya
-    scene.createDefaultCameraOrLight(true, true, true);
+    // Tambah kamera
+    scene.createDefaultCamera(true, true, true);
 
     const camera = scene.activeCamera;
     camera.alpha = Math.PI / 2;
 
-    const TRACK_WIDTH = 8; // Ubah ke 10 jika mau lebih lebar
-    const KERB_OFFSET = TRACK_WIDTH / 2 + 0.25; // Tambahan 0.25 agar kerb menempel di pinggir
+    // Tambah Cahaya
+    // Cahaya Matahari
+    const light = new BABYLON.DirectionalLight(
+      "DirectionalLight",
+      new BABYLON.Vector3(0, -1, 0),
+      scene
+    );
+    light.position = new BABYLON.Vector3(0, 10, 0);
+    light.intensity = 3;
+
+    // Cahaya Ambient Sore
+    var light1 = new BABYLON.HemisphericLight(
+      "hemiLight",
+      new BABYLON.Vector3(0, 10, 0),
+      scene
+    );
+
+    light1.intensity = 1;
+    light1.diffuse = new BABYLON.Color3(1, 0.6, 0);
+    light1.specular = new BABYLON.Color3(0.9, 0.9, 0.6);
+    light1.groundColor = new BABYLON.Color3(1, 0.5, 0.2);
 
     // Track lebih lebar
     const track = BABYLON.MeshBuilder.CreateBox(
       "track",
       {
-        width: TRACK_WIDTH,
+        width: 8,
         height: 0.1,
         depth: 100,
       },
@@ -71,6 +90,8 @@ class Playground {
     trackMat.diffuseColor = new BABYLON.Color3(0.1, 0.1, 0.1);
     track.material = trackMat;
     track.position.y = 0.05;
+
+    const KERB_OFFSET = 8 / 2 + 0.25; // Tambahan 0.25 agar kerb menempel di pinggir
 
     // Kerb kiri
     for (let i = -50; i < 50; i += 2) {
