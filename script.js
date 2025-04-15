@@ -40,6 +40,28 @@ class Playground {
 
     carRoot.rotation = new BABYLON.Vector3(0, 1.57, 0);
 
+    // Animasi Mobil
+    const animation = new BABYLON.Animation(
+      "carMove",
+      "position.z",
+      30,
+      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
+    );
+
+    // Keyframes animasi
+    const keys = [];
+    keys.push({ frame: 0, value: -40 }); // Titik awal
+    keys.push({ frame: 60, value: 40 }); // Maju
+
+    animation.setKeys(keys);
+
+    // Tambahkan animasi ke mobil
+    carRoot.animations = [animation];
+
+    // Mulai animasi
+    scene.beginAnimation(carRoot, 0, 120, true);
+
     // Tambah kamera
     scene.createDefaultCamera(true, true, true);
 
