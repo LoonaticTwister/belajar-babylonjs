@@ -29,13 +29,6 @@ class Playground {
   static async CreateScene(engine) {
     const scene = new BABYLON.Scene(engine);
 
-    // Tambah skybox
-    const hdrTexture = BABYLON.CubeTexture.CreateFromPrefilteredData(
-      "textures/environment.dds",
-      scene
-    );
-    scene.createDefaultSkybox(hdrTexture, true);
-
     // Load model mobil F1
     var result = await BABYLON.SceneLoader.ImportMeshAsync(
       "",
