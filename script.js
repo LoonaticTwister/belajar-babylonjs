@@ -39,7 +39,7 @@ class Playground {
     // Load model mobil F1
     var result = await BABYLON.SceneLoader.ImportMeshAsync(
       "",
-      "/",
+      "/models/",
       "f12026.glb",
       scene
     );
