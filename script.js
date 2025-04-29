@@ -5,6 +5,12 @@ const canvas = document.getElementById("renderCanvas");
 const startRenderLoop = function (engine, canvas) {
   engine.runRenderLoop(function () {
     if (sceneToRender && sceneToRender.activeCamera) {
+      if (carRoot) {
+        const speed = 0.2;
+        if (moveForward) carRoot.position.z += speed;
+        if (moveBackward) carRoot.position.z -= speed;
+      }
+
       sceneToRender.render();
     }
   });
@@ -14,6 +20,20 @@ const startRenderLoop = function (engine, canvas) {
 var engine = null;
 var scene = null;
 var sceneToRender = null;
+let carRoot;
+let moveForward = false;
+let moveBackward = false;
+
+// Event listener untuk keyboard
+window.addEventListener("keydown", (event) => {
+  if (event.key === "w" || event.key === "ArrowUp") moveForward = true;
+  if (event.key === "s" || event.key === "ArrowDown") moveBackward = true;
+});
+
+window.addEventListener("keyup", (event) => {
+  if (event.key === "w" || event.key === "ArrowUp") moveForward = false;
+  if (event.key === "s" || event.key === "ArrowDown") moveBackward = false;
+});
 
 // Buat engine default
 const createDefaultEngine = function () {
@@ -36,24 +56,28 @@ class Playground {
       "f12026.glb",
       scene
     );
-    const carRoot = result.meshes[0];
+
+    carRoot = result.meshes[0];
+    carRoot.rotation = new BABYLON.Vector3(0, 1.57, 0);
+    carRoot.position = new BABYLON.Vector3(0, 0.1, -40); // pastikan di awal trek
     carRoot.rotation = new BABYLON.Vector3(0, 1.57, 0);
 
     // Tambah animasi mobil
-    const animation = new BABYLON.Animation(
-      "carMove",
-      "position.z",
-      30,
-      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
-      BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
+    // const animation = new BABYLON.Animation(
+    //   "carMove",
+    //   "position.z",
+    //   30,
+    //   BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+    //   BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
+    // );
 
-    const keys = [];
-    keys.push({ frame: 0, value: -40 });
-    keys.push({ frame: 90, value: 40 });
-    animation.setKeys(keys);
-    carRoot.animations = [animation];
-    scene.beginAnimation(carRoot, 0, 90, false);
+    // const keys = [];
+    // keys.push({ frame: 0, value: -40 });
+    // keys.push({ frame: 90, value: 40 });
+    // animation.setKeys(keys);
+    // carRoot.animations = [animation];
+    // scene.beginAnimation(carRoot, 0, 90, true);
+    // dinaikkan ke atas agar bisa diakses global
 
     // Tambah kamera
     scene.createDefaultCamera(true, true, true);
